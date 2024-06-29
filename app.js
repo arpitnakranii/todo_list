@@ -75,7 +75,6 @@ app.post(process.env.ADDTASK, (req, res) => {
                     res.status(200).json({ success: true, message: 'Task is Already exits' });
                 }
                 else {
-                    //const query = `insert into  tasks (user_id,task_name) values ('" + userid + "','" + task + "')`;
                     const query = `insert into  tasks (user_id,task_name) values (?,?)`;
 
                     con.query(query,[userid,task], (err, ok) => {
