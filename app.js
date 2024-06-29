@@ -34,12 +34,26 @@ app.post(process.env.ADDUSER, (req, res) => {
         })
         return;
     }
-    const query = "insert into users (name) values ('" + user + "')";
-    con.query(query, (err, success) => {
+
+    const CheckValidUser = `select count(name) as count from users where name=?`;
+    con.query(CheckValidUser, user, (err, success) => {
         if (err) throw err;
-        res.status(200).json({
-            massage: 'User has added'
-        })
+
+        console.log(success);
+        if (success[0]['count'] != 0) {
+            res.status(200).json({
+                massage: 'User is Already Exits'
+            })
+        }
+        else{
+            const query = `insert into users (name) values (?)`;
+            con.query(query, user, (err, success) => {
+                if (err) throw err;
+                res.status(200).json({
+                    massage: 'User has added'
+                })
+            });
+        }
     });
 });
 
@@ -51,7 +65,7 @@ app.post(process.env.ADDTASK, (req, res) => {
     const CheckValidUser = `select count(id) as count from users where id=?`;
     con.query(CheckValidUser, userid, function (err, success) {
         if (err) throw err
-       
+
         if (success[0]['count'] == 0) {
             res.status(500).json({
                 status: false,
@@ -77,7 +91,7 @@ app.post(process.env.ADDTASK, (req, res) => {
                 else {
                     const query = `insert into  tasks (user_id,task_name) values (?,?)`;
 
-                    con.query(query,[userid,task], (err, ok) => {
+                    con.query(query, [userid, task], (err, ok) => {
                         if (err) {
                             res.status(500).json({ success: false, message: 'Failed to add task', error: err });
                             return;
@@ -130,15 +144,14 @@ app.post(process.env.SHOW_TASK, function (req, res) {
                 status: false,
                 massage: 'Enter Valid id'
             })
-           
+
         }
-        else
-        {
+        else {
             const query = 'select task_name from tasks where user_id=' + id;
 
             con.query(query, function (err, success) {
                 if (err) throw err;
-        
+
                 res.status(200).json({
                     massage: 'Data fetch Successfully',
                     data: success
@@ -146,10 +159,10 @@ app.post(process.env.SHOW_TASK, function (req, res) {
             })
         }
     })
-   
+
 });
 
-app.post(process.env.SHOW_USER, function (req, res) {
+app.get(process.env.SHOW_USER, function (req, res) {
     const query = `select name from users`;
     con.query(query, function (err, success) {
         if (err) throw err;
@@ -171,21 +184,20 @@ app.delete(process.env.DELET_USER, function (req, res) {
                 status: false,
                 massage: 'Enter Valid id'
             })
-            
-        }else
-        {
-            const query = `delete  from users where id=`+id;
+
+        } else {
+            const query = `delete  from users where id=` + id;
             con.query(query, function (err, success) {
                 if (err) throw err;
-        
+
                 res.status(200).json({
-                    status:true,
-                    massage: 'Delete user Successfully', 
+                    status: true,
+                    massage: 'Delete user Successfully',
                 })
             })
         }
     })
-    
+
 })
 
 app.listen(5000);
