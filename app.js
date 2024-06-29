@@ -51,7 +51,7 @@ app.post(process.env.ADDTASK, (req, res) => {
     const CheckValidUser = `select count(id) as count from users where id=?`;
     con.query(CheckValidUser, userid, function (err, success) {
         if (err) throw err
-        // console.log(success[0]['count'] = 0)
+       
         if (success[0]['count'] == 0) {
             res.status(500).json({
                 status: false,
@@ -72,9 +72,7 @@ app.post(process.env.ADDTASK, (req, res) => {
                     return;
                 }
                 if (ok.length > 0) {
-                    // console.log(ok)
                     res.status(200).json({ success: true, message: 'Task is Already exits' });
-                    // return;
                 }
                 else {
                     const query = "insert into  tasks (user_id,task_name) values ('" + userid + "','" + task + "')";
