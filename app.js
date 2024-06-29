@@ -79,8 +79,8 @@ app.post(process.env.ADDTASK, (req, res) => {
             })
         }
         else {
-            const Check = 'SELECT * FROM tasks where task_name =? and user_id=' + userid;
-            con.query(Check, [task], (err, ok) => {
+            const Check = `SELECT * FROM tasks where task_name =? and user_id=?`;
+            con.query(Check, [task,userid], (err, ok) => {
                 if (err) {
                     res.status(500).json({ success: false, message: 'Failed to add task', error: err });
                     return;
