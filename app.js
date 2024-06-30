@@ -86,7 +86,6 @@ app.post('/add-task', (req, res) => {
                         message: 'Failed to add task',
                         error: err
                     });
-                    return;
                 }
                 if (success.length > 0) {
                     res.status(200).json({
