@@ -113,7 +113,7 @@ app.post('/add-task', (req, res) => {
                 }
             });
         }
-    })
+    });
 });
 
 app.delete('/delete-task', function (req, res) {
@@ -140,10 +140,9 @@ app.delete('/delete-task', function (req, res) {
         res.status(200).json({
             status: true,
             massage: 'Delete Succesfully'
-        })
-
-    })
-})
+        });
+    });
+});
 
 app.post('/get-task', function (req, res) {
 
