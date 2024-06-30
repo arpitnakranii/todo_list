@@ -65,7 +65,7 @@ app.post('/add-task', (req, res) => {
     con.query(checkValidUser, [userId], function (err, success) {
         if (err) throw err
 
-        if (success[0]['count'] == 0) {
+        if (success[0]['count'] === 0) {
             res.status(500).json({
                 status: false,
                 massage: 'Plz Register user and then add task'
@@ -123,7 +123,7 @@ app.delete('/delete-task', function (req, res) {
     con.query(checkValidUser, [id], function (err, success) {
         if (err) throw err
 
-        if (success[0]['count'] == 0) {
+        if (success[0]['count'] === 0) {
             res.status(500).json({
                 status: false,
                 massage: 'Enter Valid id'
@@ -151,7 +151,7 @@ app.post('/get-task', function (req, res) {
     const checkValidUser = `select count(id) as count from users where id=?`;
     con.query(checkValidUser, [id], function (err, success) {
         if (err) throw err
-        if (success[0]['count'] == 0) {
+        if (success[0]['count'] === 0) {
             res.status(500).json({
                 status: false,
                 massage: 'Enter Valid id'
@@ -191,7 +191,7 @@ app.delete('/delete-user', function (req, res) {
     const checkValidUser = `select count(id) as count from users where id=?`;
     con.query(checkValidUser, [id], function (err, success) {
         if (err) throw err
-        if (success[0]['count'] == 0) {
+        if (success[0]['count'] === 0) {
             res.status(500).json({
                 status: false,
                 massage: 'Enter Valid id'
