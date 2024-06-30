@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const dotEnv = require('dotenv');
 
 
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: false }));
 dotEnv.config({ path: './.env' });
 
 
