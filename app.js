@@ -1,12 +1,12 @@
 const mysql = require('mysql');
 const express = require('express');
 const app = express();
-const bodyparser = require('body-parser');
-const dotenv = require('dotenv');
+const bodyParser = require('body-parser');
+const dotEnv = require('dotenv');
 
 
-app.use(bodyparser.urlencoded({ extended: false }))
-dotenv.config({ path: './.env' });
+app.use(bodyParser.urlencoded({ extended: false }))
+dotEnv.config({ path: './.env' });
 
 
 const con = mysql.createConnection({
@@ -19,85 +19,96 @@ const con = mysql.createConnection({
 
 con.connect(function (err, res) {
     if (err) throw err;
-    console.log("DB Cnnnected");
 })
 
 
-app.post(process.env.ADDUSER, (req, res) => {
+app.post('/add-user', (req, res) => {
 
-    user = req.body.name;
-    console.log(user == "" || user == undefined)
-    if (user == "" || user == undefined) {
+    const user = req.body.name;
+
+    if (!user) {
         res.status(200).json({
             status: false,
             massage: 'Plz Enter valie name'
-        })
+        });
         return;
     }
 
-    const CheckValidUser = `select count(name) as count from users where name=?`;
-    con.query(CheckValidUser, user, (err, success) => {
+    const checkValidUser = `select count(name) as count from users where name=?`;
+    con.query(checkValidUser, [user], (err, success) => {
         if (err) throw err;
 
-        console.log(success);
+
         if (success[0]['count'] != 0) {
             res.status(200).json({
                 massage: 'User is Already Exits'
-            })
+            });
         }
-        else{
+        else {
             const query = `insert into users (name) values (?)`;
-            con.query(query, user, (err, success) => {
+            con.query(query, [user], (err, success) => {
                 if (err) throw err;
                 res.status(200).json({
                     massage: 'User has added'
-                })
+                });
             });
         }
     });
 });
 
-app.post(process.env.ADDTASK, (req, res) => {
+app.post('/add-task', (req, res) => {
 
-    userid = req.body.userid;
-    task = req.body.taskName;
+   const userId = req.body.userid;
+    const task = req.body.taskName;
 
-    const CheckValidUser = `select count(id) as count from users where id=?`;
-    con.query(CheckValidUser, userid, function (err, success) {
+    const checkValidUser = `select count(id) as count from users where id=?`;
+    con.query(checkValidUser, [userId], function (err, success) {
         if (err) throw err
 
         if (success[0]['count'] == 0) {
             res.status(500).json({
                 status: false,
                 massage: 'Plz Register user and then add task'
-            })
+            });
         }
-        else if (task == "" || task == undefined) {
+        else if (!task) {
             res.status(500).json({
                 status: false,
                 massage: 'Enter valid Task'
-            })
+            });
         }
         else {
-            const Check = `SELECT * FROM tasks where task_name =? and user_id=?`;
-            con.query(Check, [task,userid], (err, ok) => {
+            const check = `SELECT * FROM tasks where task_name =? and user_id=?`;
+            con.query(check, [task, userId], (err, success) => {
                 if (err) {
-                    res.status(500).json({ success: false, message: 'Failed to add task', error: err });
+                    res.status(500).json({
+                        status: false,
+                        message: 'Failed to add task',
+                        error: err
+                    });
                     return;
                 }
-                if (ok.length > 0) {
-                    res.status(200).json({ success: true, message: 'Task is Already exits' });
+                if (success.length > 0) {
+                    res.status(200).json({
+                        status: true, message: 'Task is Already exits'
+                    });
                 }
                 else {
                     const query = `insert into  tasks (user_id,task_name) values (?,?)`;
 
-                    con.query(query, [userid, task], (err, ok) => {
+                    con.query(query, [userId, task], (err, success) => {
                         if (err) {
-                            res.status(500).json({ success: false, message: 'Failed to add task', error: err });
+                            res.status(500).json({
+                                status: false,
+                                message: 'Failed to add task',
+                                error: err
+                            });
                             return;
                         }
-                        console.log(ok);
-                        res.status(200).json({ success: true, message: 'Task added successfully' });
+                        res.status(200).json({
+                            status: true,
+                            message: 'Task added successfully'
+                        });
                     });
                 }
             });
@@ -105,21 +116,22 @@ app.post(process.env.ADDTASK, (req, res) => {
     })
 });
 
-app.delete(process.env.DELET_TASK, function (req, res) {
+app.delete('/delete-task', function (req, res) {
     const id = req.body.id;
 
-    const CheckValidUser = `select count(id) as count from users where id=?`;
-    con.query(CheckValidUser, id, function (err, success) {
+    const checkValidUser = `select count(id) as count from users where id=?`;
+    con.query(checkValidUser, [id], function (err, success) {
         if (err) throw err
+
         if (success[0]['count'] == 0) {
             res.status(500).json({
                 status: false,
                 massage: 'Enter Valid id'
-            })
+            });
         }
-    })
-    const query = 'delete from tasks where task_id=' + id;
-    con.query(query, (err, success) => {
+    });
+    const query = 'delete from tasks where task_id=?';
+    con.query(query, [id], (err, success) => {
         if (err) {
             res.status(500).json({
                 massge: err
@@ -133,36 +145,36 @@ app.delete(process.env.DELET_TASK, function (req, res) {
     })
 })
 
-app.post(process.env.SHOW_TASK, function (req, res) {
+app.post('/get-task', function (req, res) {
 
     const id = req.body.id;
-    const CheckValidUser = `select count(id) as count from users where id=?`;
-    con.query(CheckValidUser, id, function (err, success) {
+    const checkValidUser = `select count(id) as count from users where id=?`;
+    con.query(checkValidUser, [id], function (err, success) {
         if (err) throw err
         if (success[0]['count'] == 0) {
             res.status(500).json({
                 status: false,
                 massage: 'Enter Valid id'
-            })
+            });
 
         }
         else {
-            const query = 'select task_name from tasks where user_id=' + id;
+            const query = 'select task_name from tasks where user_id=?';
 
-            con.query(query, function (err, success) {
+            con.query(query, [id], function (err, success) {
                 if (err) throw err;
 
                 res.status(200).json({
                     massage: 'Data fetch Successfully',
                     data: success
-                })
-            })
+                });
+            });
         }
-    })
+    });
 
 });
 
-app.get(process.env.SHOW_USER, function (req, res) {
+app.get('/get-user', function (req, res) {
     const query = `select name from users`;
     con.query(query, function (err, success) {
         if (err) throw err;
@@ -170,34 +182,34 @@ app.get(process.env.SHOW_USER, function (req, res) {
         res.status(200).json({
             massage: 'Data fetch Successfully',
             data: success
-        })
-    })
-})
-app.delete(process.env.DELET_USER, function (req, res) {
+        });
+    });
+});
+app.delete('/delete-user', function (req, res) {
     const id = req.body.id;
 
-    const CheckValidUser = `select count(id) as count from users where id=?`;
-    con.query(CheckValidUser, id, function (err, success) {
+    const checkValidUser = `select count(id) as count from users where id=?`;
+    con.query(checkValidUser, [id], function (err, success) {
         if (err) throw err
         if (success[0]['count'] == 0) {
             res.status(500).json({
                 status: false,
                 massage: 'Enter Valid id'
-            })
+            });
 
         } else {
-            const query = `delete  from users where id=` + id;
-            con.query(query, function (err, success) {
+            const query = `delete  from users where id=?`;
+            con.query(query, [id], function (err, success) {
                 if (err) throw err;
 
                 res.status(200).json({
                     status: true,
                     massage: 'Delete user Successfully',
-                })
-            })
+                });
+            });
         }
-    })
+    });
 
-})
+});
 
 app.listen(5000);
